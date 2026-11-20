@@ -82,7 +82,8 @@
   let m3 = null;
   document.getElementById('c3d').onclick = () => { m.style.display = 'none'; if (m3) { m3.remove(); m3 = null; } };
 
-  const dgis = 'https://tile2.' + '://2gis.com{x}&y={y}&z={z}&v=1';
+  const osm = 'https://tile.' + 'openstreetmap.org/{z}/{x}/{y}.png';
+
 
   map.on('popupopen', e => {
     const ll = e.popup.getLatLng(), body = e.popup.getElement().querySelector('.popup-body');
@@ -95,7 +96,9 @@
         document.getElementById('t3d').textContent = `3D-обзор: ${name}`;
         setTimeout(() => {
           m3 = L.map('map3d', { zoomControl: false }).setView([ll.lat, ll.lng], 13);
-          L.tileLayer(dgis).addTo(m3);
+          L.tileLayer(osm).addTo(m3);
+m3.invalidateSize();
+
           const idx = depositsData.findIndex(x => x.n === name);
           if (idx >= 0) L.polygon(getPoly(ll.lat, ll.lng, idx + 1, 10), { color: '#38bdf8', weight: 2, fillColor: '#38bdf8', fillOpacity: 0.25 }).addTo(m3);
           L.circleMarker([ll.lat, ll.lng], { radius: 7, color: '#fff', fillColor: '#38bdf8', fillOpacity: 1 }).addTo(m3);
