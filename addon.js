@@ -79,12 +79,13 @@
   const m = document.createElement('div'); m.id = 'm3d';
   m.innerHTML = `<div id="m3d-box"><div id="t3d"></div><button id="c3d">✕ Закрыть 3D</button><div id="map3d"></div></div>`;
   document.body.appendChild(m);
-     const cnv = document.createElement('canvas');
+       const cnv = document.createElement('canvas');
   cnv.style.cssText = 'width:100%;height:100%;display:block;touch-action:none;';
   document.getElementById('map3d').style.transform = 'none';
   document.getElementById('map3d').appendChild(cnv);
 
-  let rotY = 0.6, rotX = 0.45, drag = false, lx = 0, ly = 0, anim3d = null, curCol = '#38bdf8', curType = '', curName = '';
+  let rotY = 0.65, rotX = 0.42, drag = false, lx = 0, ly = 0, anim3d = null, curCol = '#38bdf8', curType = '', curName = '';
+  const P = Array.of;
 
   cnv.onpointerdown = e => { drag = true; lx = e.clientX; ly = e.clientY; };
   window.onpointerup = () => drag = false;
@@ -100,23 +101,22 @@
     const w = cnv.width = cnv.offsetWidth, h = cnv.height = cnv.offsetHeight;
     const ctx = cnv.getContext('2d');
     ctx.clearRect(0, 0, w, h);
-    if (!drag) rotY += 0.005;
+    if (!drag) rotY += 0.004;
 
     const proj = (x, y, z) => {
       const x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
       const z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
       const y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
       const z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
-      const s = 420 / (420 + z2);
-      return [w / 2 + x1 * s, h / 2 + y2 * s];
+      const s = 440 / (440 + z2);
+      return P(w * 0.38 + x1 * s, h * 0.54 + y2 * s);
     };
 
-    const faces = ['0,1,2,3', '4,5,6,7', '0,1,5,4', '1,2,6,5', '2,3,7,6', '3,0,4,7'].map(s => s.split(',').map(Number));
+    const faces = P(P(0,1,2,3), P(4,5,6,7), P(0,1,5,4), P(1,2,6,5), P(2,3,7,6), P(3,0,4,7));
 
-    const drawBox = (y1, y2, fill, stroke) => {
-      const sz = 105;
-      const pts = [[-sz,y1,-sz],[sz,y1,-sz],[sz,y1,sz],[-sz,y1,sz],[-sz,y2,-sz],[sz,y2,-sz],[sz,y2,sz],[-sz,y2,sz]].map(p => proj(...p));
-      ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = 1.2;
+    const drawBox = (x1, x2, y1, y2, z1, z2, fill, stroke, lw = 1.1) => {
+      const pts = P(P(x1,y1,z1),P(x2,y1,z1),P(x2,y1,z2),P(x1,y1,z2),P(x1,y2,z1),P(x2,y2,z1),P(x2,y2,z2),P(x1,y2,z2)).map(p => proj(...p));
+      ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = lw;
       faces.forEach(f => {
         ctx.beginPath();
         f.forEach((idx, i) => i ? ctx.lineTo(...pts[idx]) : ctx.moveTo(...pts[idx]));
@@ -124,23 +124,69 @@
       });
     };
 
-    drawBox(-70, -45, 'rgba(34,197,94,0.22)', '#22c55e');
-    drawBox(-45, 5, 'rgba(100,116,139,0.25)', '#64748b');
-    drawBox(5, 35, curCol + '55', curCol);
-    drawBox(35, 70, 'rgba(30,41,59,0.5)', '#475569');
+    const line3D = (a, b, col, lw = 1.5) => {
+      const p1 = proj(...a), p2 = proj(...b);
+      ctx.strokeStyle = col; ctx.lineWidth = lw;
+      ctx.beginPath(); ctx.moveTo(...p1); ctx.lineTo(...p2); ctx.stroke();
+    };
 
-    const pTop = proj(0, -115, 0), pBase1 = proj(-14, -70, -14), pBase2 = proj(14, -70, -14), pBase3 = proj(14, -70, 14), pBase4 = proj(-14, -70, 14), pPipe = proj(0, 22, 0);
-    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
-    [pBase1, pBase2, pBase3, pBase4].forEach(b => { ctx.beginPath(); ctx.moveTo(...pTop); ctx.lineTo(...b); ctx.stroke(); });
-    ctx.strokeStyle = curCol; ctx.lineWidth = 3; ctx.setLineDash('4,4'.split(',').map(Number));
-    ctx.beginPath(); ctx.moveTo(...proj(0, -70, 0)); ctx.lineTo(...pPipe); ctx.stroke(); ctx.setLineDash([]);
+    const sz = 76;
+    drawBox(-sz, sz, 35, 68, -sz, sz, 'rgba(30,41,59,0.55)', '#475569');
+    drawBox(-sz, sz, 5, 35, -sz, sz, curCol + '55', curCol);
+    drawBox(-sz, sz, -42, 5, -sz, sz, 'rgba(100,116,139,0.28)', '#64748b');
+    drawBox(-sz, sz, -64, -42, -sz, sz, 'rgba(34,197,94,0.24)', '#22c55e');
+
+    drawBox(-26, 26, -69, -64, -22, 22, 'rgba(56,189,248,0.28)', '#38bdf8', 1.2);
+    drawBox(11, 23, -78, -69, -12, 12, 'rgba(148,163,184,0.38)', '#94a3b8', 1);
+
+    const legs = P(P(-12,-69,-12), P(12,-69,-12), P(12,-69,12), P(-12,-69,12));
+    const tops = P(P(-3.5,-138,-3.5), P(3.5,-138,-3.5), P(3.5,-138,3.5), P(-3.5,-138,3.5));
+    for (let i = 0; i < 4; i++) {
+      const ni = (i + 1) % 4;
+      const a = legs.at(i), b = legs.at(ni), ta = tops.at(i), tb = tops.at(ni);
+      line3D(a, ta, '#e2e8f0', 1.8);
+      line3D(ta, tb, '#38bdf8', 1.5);
+      const m1 = P(a.at(0) * 0.65, -103, a.at(2) * 0.65);
+      const m2 = P(b.at(0) * 0.65, -103, b.at(2) * 0.65);
+      line3D(m1, m2, '#38bdf8', 1.1);
+      line3D(a, m2, 'rgba(56,189,248,0.5)', 0.9);
+    }
+
+    const crown = proj(0, -143, 0);
+    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(crown.at(0), crown.at(1), 3.5, 0, Math.PI * 2); ctx.fill();
+
+    ctx.setLineDash(P(4, 3));
+    line3D(P(0, -138, 0), P(0, 20, 0), curCol, 2.5);
+    ctx.setLineDash(P());
+    const tip = proj(0, 20, 0);
+    ctx.fillStyle = curCol; ctx.beginPath(); ctx.arc(tip.at(0), tip.at(1), 4, 0, Math.PI * 2); ctx.fill();
+
+    const layers = P(
+      P(-53, 'Почва / тайга', '#22c55e'),
+      P(-19, 'Осадочные породы', '#94a3b8'),
+      P(20, `Пласт: ${curType}`, curCol),
+      P(52, 'Фундамент', '#64748b')
+    );
+
+    ctx.font = 'bold 11px sans-serif';
+    layers.forEach(([my, txt, col]) => {
+      const corners = P(P(-sz,my,-sz), P(sz,my,-sz), P(sz,my,sz), P(-sz,my,sz)).map(p => proj(...p));
+      const rp = corners.reduce((a, b) => b.at(0) > a.at(0) ? b : a);
+      const rx = rp.at(0), ry = rp.at(1);
+      const lx2 = Math.min(w - 115, rx + 18);
+      ctx.strokeStyle = col; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(lx2, ry); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(rx, ry, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(9,14,28,0.85)'; ctx.fillRect(lx2 + 3, ry - 9, 110, 16);
+      ctx.fillStyle = '#f8fafc'; ctx.fillText(txt.slice(0, 17), lx2 + 6, ry + 3);
+    });
 
     ctx.fillStyle = '#e2e8f0'; ctx.font = '12px monospace';
-    ctx.fillText(`ОБЪЕКТ: ${curName}`, 18, h - 58);
+    ctx.fillText(`ОБЪЕКТ: ${curName}`, 16, h - 52);
     ctx.fillStyle = curCol;
-    ctx.fillText(`ПЛАСТ: ${curType.toUpperCase()} (ГЛУБИНА ~${curType.includes('нефть') || curType.includes('газ') ? '2400 м' : '450 м'})`, 18, h - 38);
+    ctx.fillText(`ГЛУБИНА ЗАЛЕГАНИЯ: ~${curType.includes('нефть') || curType.includes('газ') ? '2400 м' : '450 м'}`, 16, h - 34);
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('Потяните пальцем для вращения 3D-разреза', 18, h - 18);
+    ctx.fillText('Потяните пальцем для вращения 3D-разреза', 16, h - 16);
 
     anim3d = requestAnimationFrame(draw3DBlock);
   }
