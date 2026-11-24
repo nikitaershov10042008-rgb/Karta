@@ -216,4 +216,22 @@
   document.querySelectorAll('#filtersList input').forEach(cb => { cb.onchange = () => { cb.checked ? activeCategories.add(cb.value) : activeCategories.delete(cb.value); enhancedUpdate(); }; });
   chJs.onload = enhancedUpdate;
   enhancedUpdate();
+  const zones = L.layerGroup().addTo(map);
+  depositsData.forEach((d, i) => {
+    const big = (d.v || '').toLowerCase().includes('крупн') || (d.v || '').toLowerCase().includes('уникал');
+    const km = big ? 14 : 7, pts = [];
+    for (let k = 0; k < 7; k++) {
+      const a = (k / 7) * Math.PI * 2;
+      const h = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453;
+      const j = 0.65 + (h - Math.floor(h)) * 0.65;
+      pts.push([d.lat + Math.sin(a) * (km * j) / 111, d.lng + Math.cos(a) * (km * j) / (111 * Math.cos(d.lat * Math.PI / 180))]);
+    }
+    const col = (categoryStyles[d.c] && categoryStyles[d.c].color) || '#38bdf8';
+    const p = L.polygon(pts, { color: col, weight: 1.5, dashArray: '5,4', fillColor: col, fillOpacity: 0.16 });
+    p.on('mouseover', () => p.setStyle({ fillOpacity: 0.38, weight: 2.5 }));
+    p.on('mouseout', () => p.setStyle({ fillOpacity: 0.16, weight: 1.5 }));
+    p.on('click', () => { const f = allMarkers.find(x => x.data.n === d.n); if (f) f.marker.openPopup(); });
+    p.addTo(zones);
+  });
+
 })();
