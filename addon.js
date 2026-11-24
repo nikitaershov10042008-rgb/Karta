@@ -293,7 +293,7 @@
     img.onerror = () => img.style.display = 'none';
     body.insertBefore(img, body.firstChild);
   });
-      const P = Array.of;
+      const M = Array.of;
   const world = P(P(90, -180), P(90, 180), P(-90, 180), P(-90, -180));
   const pts = depositsData.map(d => P(d.lat, d.lng)).sort((a, b) => a.at(1) - b.at(1) || a.at(0) - b.at(0));
   const cross = (o, a, b) => (a.at(1) - o.at(1)) * (b.at(0) - o.at(0)) - (a.at(0) - o.at(0)) * (b.at(1) - o.at(1));
