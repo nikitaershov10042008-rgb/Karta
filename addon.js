@@ -293,7 +293,7 @@
     img.onerror = () => img.style.display = 'none';
     body.insertBefore(img, body.firstChild);
   });
-    const P = Array.of;
+      const P = Array.of;
   const world = P(P(90, -180), P(90, 180), P(-90, 180), P(-90, -180));
   const pts = depositsData.map(d => P(d.lat, d.lng)).sort((a, b) => a.at(1) - b.at(1) || a.at(0) - b.at(0));
   const cross = (o, a, b) => (a.at(1) - o.at(1)) * (b.at(0) - o.at(0)) - (a.at(0) - o.at(0)) * (b.at(1) - o.at(1));
@@ -308,8 +308,12 @@
   const cLat = hull.reduce((s, p) => s + p.at(0), 0) / hull.length;
   const cLng = hull.reduce((s, p) => s + p.at(1), 0) / hull.length;
   const westSiberia = hull.map(p => {
-    const a = Math.atan2(p.at(0) - cLat, p.at(1) - cLng);
-    return P(p.at(0) + Math.sin(a) * 1.5, p.at(1) + Math.cos(a) * 2.4);
+    const dLat = p.at(0) - cLat;
+    const dLng = (p.at(1) - cLng) * Math.cos(p.at(0) * Math.PI / 180);
+    const a = Math.atan2(dLat, dLng);
+    const padLat = Math.sin(a) * 1.8;
+    const padLng = (Math.cos(a) * 1.8) / Math.cos(p.at(0) * Math.PI / 180);
+    return P(p.at(0) + padLat, p.at(1) + padLng);
   });
 
   L.polygon(P(world, westSiberia), {
@@ -319,5 +323,6 @@
     fillOpacity: 0.72,
     interactive: false
   }).addTo(map);
+
 
 })();
