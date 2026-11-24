@@ -304,6 +304,45 @@
     interactive: false
   }).addTo(map);
  
+  let maxYear = 2026, playTimer = null;
+  const tlBox = document.createElement('div');
+  tlBox.style.cssText = 'position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(9,14,28,0.92);backdrop-filter:blur(12px);border:1px solid rgba(56,189,248,0.35);border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:10px;color:#e2e8f0;font-family:monospace;box-shadow:0 0 20px rgba(0,0,0,0.6);width:min(420px,calc(100vw - 28px));';
+  tlBox.innerHTML = `<button id="tlPlay" style="background:#0284c7;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-weight:700;cursor:pointer;">▶</button><span style="font-size:11px;color:#94a3b8;">1950</span><input id="tlRange" type="range" min="1950" max="2026" value="2026" style="flex:1;accent-color:#38bdf8;cursor:pointer;"><span id="tlVal" style="font-size:14px;font-weight:700;color:#38bdf8;min-width:38px;">2026</span>`;
+  document.body.appendChild(tlBox);
+
+  const tlRange = document.getElementById('tlRange');
+  const tlVal = document.getElementById('tlVal');
+  const tlPlay = document.getElementById('tlPlay');
+
+  function applyTimeline() {
+    maxYear = Number(tlRange.value);
+    tlVal.textContent = maxYear;
+    allMarkers.forEach(({ data, marker }) => {
+      const y = parseInt(data.d, 10) || 1960;
+      if (y > maxYear && markersLayer.hasLayer(marker)) markersLayer.removeLayer(marker);
+    });
+  }
+
+  const origUpd = window.updateMap;
+  window.updateMap = function() { origUpd(); applyTimeline(); };
+  tlRange.oninput = () => window.updateMap();
+
+  tlPlay.onclick = () => {
+    if (playTimer) {
+      clearInterval(playTimer); playTimer = null; tlPlay.textContent = '▶';
+      return;
+    }
+    if (Number(tlRange.value) >= 2026) tlRange.value = 1950;
+    tlPlay.textContent = '⏸';
+    playTimer = setInterval(() => {
+      if (Number(tlRange.value) >= 2026) {
+        clearInterval(playTimer); playTimer = null; tlPlay.textContent = '▶';
+        return;
+      }
+      tlRange.value = Number(tlRange.value) + 1;
+      window.updateMap();
+    }, 180);
+  };
 
 
 })();
