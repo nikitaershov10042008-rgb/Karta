@@ -261,14 +261,16 @@
   document.querySelectorAll('#filtersList input').forEach(cb => { cb.onchange = () => { cb.checked ? activeCategories.add(cb.value) : activeCategories.delete(cb.value); enhancedUpdate(); }; });
   chJs.onload = enhancedUpdate;
   enhancedUpdate();
-    
-  function getSvgCard(cat, name) {
+      function createCardBanner(cat) {
     const c = (categoryStyles[cat] && categoryStyles[cat].color) || '#38bdf8';
+    const wrap = document.createElement('div');
+    wrap.className = 'popup-img';
+    wrap.style.cssText = 'width:100%;height:105px;border-radius:6px;margin-bottom:8px;border:1px solid rgba(56,189,248,0.35);overflow:hidden;background:linear-gradient(135deg,#090e1c,#1e293b);';
     let art = `<circle cx="150" cy="58" r="26" fill="${c}" opacity="0.2"/><path d="M135 75 L150 30 L165 75 M140 60 L160 60 M144 46 L156 46" stroke="${c}" stroke-width="2.5" fill="none"/>`;
     if (cat.includes('газ')) art = `<path d="M90 78 H210 M110 78 V55 H190 V78" stroke="${c}" stroke-width="2.5" fill="none"/><path d="M150 22 Q162 38 150 50 Q138 38 150 22 Z" fill="${c}" opacity="0.85"/>`;
     if (cat.includes('уголь') || cat.includes('руд') || cat.includes('металл') || cat.includes('золот')) art = `<polygon points="85,82 135,34 175,65 215,38 250,82" fill="${c}" opacity="0.25" stroke="${c}" stroke-width="2"/><circle cx="175" cy="45" r="5" fill="${c}"/>`;
-    const svg = `<svg xmlns="http://w3.org" width="300" height="105" viewBox="0 0 300 105"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#090e1c"/><stop offset="100%" stop-color="#1e293b"/></linearGradient></defs><rect width="300" height="105" fill="url(#g)"/><g stroke="#38bdf8" stroke-opacity="0.12" stroke-width="1"><path d="M0 25 H300 M0 50 H300 M0 75 H300 M60 0 V105 M150 0 V105 M240 0 V105"/></g>${art}<text x="12" y="20" fill="${c}" font-family="monospace" font-size="10" font-weight="bold">// ${cat.toUpperCase()}</text><text x="12" y="96" fill="#94a3b8" font-family="monospace" font-size="9">СЕКТОР: ЗАПАДНАЯ СИБИРЬ</text></svg>`;
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    wrap.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 300 105"><g stroke="#38bdf8" stroke-opacity="0.14" stroke-width="1"><path d="M0 25 H300 M0 50 H300 M0 75 H300 M60 0 V105 M150 0 V105 M240 0 V105"/></g>${art}<text x="12" y="20" fill="${c}" font-family="monospace" font-size="11" font-weight="bold">// ${cat.toUpperCase()}</text><text x="12" y="95" fill="#94a3b8" font-family="monospace" font-size="9">СЕКТОР: ЗАПАДНАЯ СИБИРЬ</text></svg>`;
+    return wrap;
   }
 
   map.on('popupopen', e => {
@@ -276,10 +278,16 @@
     if (!body) return;
     const name = title ? title.textContent.trim() : 'Месторождение', d = depositsData.find(x => x.n === name);
     if (!body.querySelector('.popup-img')) {
-      const img = document.createElement('img'); img.className = 'popup-img';
-      img.src = (d && d.img) || getSvgCard(d ? d.c : 'ресурс', name);
-      img.style.cssText = 'width:100%;height:105px;object-fit:cover;border-radius:6px;margin-bottom:8px;border:1px solid rgba(56,189,248,0.35);display:block;';
-      body.insertBefore(img, body.firstChild);
+      body.insertBefore(createCardBanner(d ? d.c : 'ресурс'), body.firstChild);
+    }
+    if (!body.querySelector('.btn-3d')) {
+      const btn = document.createElement('button'); btn.className = 'btn-3d'; btn.textContent = '🧊 3D-разрез пласта';
+      btn.onclick = () => { curName = name; curType = d ? d.c : 'порода'; curCol = (d && categoryStyles[d.c] && categoryStyles[d.c].color) || '#38bdf8'; document.getElementById('t3d').textContent = `Гео-разрез 3D: ${curName}`; m.style.display = 'flex'; cancelAnimationFrame(anim3d); draw3DBlock(); };
+      body.appendChild(btn);
+    }
+  });
+
+  
     }
     if (!body.querySelector('.btn-3d')) {
       const btn = document.createElement('button'); btn.className = 'btn-3d'; btn.textContent = '🧊 3D-разрез пласта';
