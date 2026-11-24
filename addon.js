@@ -261,21 +261,15 @@
   document.querySelectorAll('#filtersList input').forEach(cb => { cb.onchange = () => { cb.checked ? activeCategories.add(cb.value) : activeCategories.delete(cb.value); enhancedUpdate(); }; });
   chJs.onload = enhancedUpdate;
   enhancedUpdate();
-  const wiki = 'https://upload.' + 'wikimedia.org/wikipedia/commons/thumb/';
-  const exactPhotos = {
-    'Самотлорское': wiki + 'a/a7/%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg/640px-%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg',
-    'Уренгойское': wiki + '6/6b/%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg/640px-%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg',
-    'Ямбургское': wiki + '4/4c/Jamburg_Ansicht.JPG/640px-Jamburg_Ansicht.JPG'
+    const u = 'https://images.' + '://unsplash.com';
+  const catPhotos = {
+    'нефть': u + '1518709268805-4e9042af9f23?w=600&q=80',
+    'нефть и газ': u + '1541888081622-1461215e3b00?w=600&q=80',
+    'газ': u + '1584267385494-9fdd9a71ad75?w=600&q=80',
+    'уголь': u + '1579546929518-9e396f3cc809?w=600&q=80',
+    'золото': u + '1610375461246-83df859d849d?w=600&q=80'
   };
 
-  const catPhotos = {
-    'нефть': wiki + 'a/a7/%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg/640px-%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg',
-    'нефть и газ': wiki + '4/4c/Jamburg_Ansicht.JPG/640px-Jamburg_Ansicht.JPG',
-    'газ': wiki + '6/6b/%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg/640px-%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg',
-    'уголь': wiki + 'c/c5/BelAZ_75600.JPG/640px-BelAZ_75600.JPG',
-    'железная руда': wiki + '8/87/Mining_in_Mezhdurechensk.jpg/640px-Mining_in_Mezhdurechensk.jpg'
-  };
-  const defPhoto = wiki + '8/87/Mining_in_Mezhdurechensk.jpg/640px-Mining_in_Mezhdurechensk.jpg';
 
   map.on('popupopen', e => {
     const body = e.popup.getElement().querySelector('.popup-body');
