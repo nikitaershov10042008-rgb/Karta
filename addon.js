@@ -233,5 +233,58 @@
     p.on('click', () => { const f = allMarkers.find(x => x.data.n === d.n); if (f) f.marker.openPopup(); });
     p.addTo(zones);
   });
+  let cmpList = [];
+  const cmpModal = document.createElement('div');
+  cmpModal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(5,9,20,0.92);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:14px;';
+  cmpModal.innerHTML = `<div style="width:min(540px,95vw);background:#090e1c;border:1px solid #38bdf8;border-radius:12px;padding:16px;color:#e2e8f0;box-shadow:0 0 35px rgba(56,189,248,0.3);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(56,189,248,0.3);padding-bottom:8px;"><span style="color:#38bdf8;font-weight:700;font-size:13px;">⚖️ СРАВНЕНИЕ ОБЪЕКТОВ</span><button id="closeCmp" style="background:none;border:1px solid #38bdf8;color:#38bdf8;border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:700;">✕</button></div><div id="cmpBody" style="font-size:12px;overflow-x:auto;"></div></div>`;
+  document.body.appendChild(cmpModal);
+
+  document.getElementById('closeCmp').onclick = () => { cmpModal.style.display = 'none'; cmpList = []; };
+
+  function showCompare(a, b) {
+    const dist = Math.round(map.distance([a.lat, a.lng], [b.lat, b.lng]) / 1000);
+    const rows = [
+      ['Ресурс', a.c, b.c],
+      ['Район', a.l, b.l],
+      ['Открыто', a.d + ' г.', b.d + ' г.'],
+      ['Добыча с', a.s + ' г.', b.s + ' г.'],
+      ['Статус', a.a, b.a],
+      ['Запасы', a.v, b.v]
+    ];
+    let html = `<table style="width:100%;border-collapse:collapse;text-align:left;"><tr><th style="padding:6px;color:#94a3b8;width:24%;">Параметр</th><th style="padding:6px;color:#38bdf8;width:38%;">${a.n}</th><th style="padding:6px;color:#10b981;width:38%;">${b.n}</th></tr>`;
+    rows.forEach(([k, v1, v2]) => {
+      html += `<tr style="border-top:1px solid rgba(56,189,248,0.18);"><td style="padding:7px 6px;color:#94a3b8;">${k}</td><td style="padding:7px 6px;">${v1}</td><td style="padding:7px 6px;">${v2}</td></tr>`;
+    });
+    html += `</table><div style="margin-top:12px;padding:8px;background:rgba(56,189,248,0.12);border-radius:6px;text-align:center;color:#38bdf8;font-family:monospace;">РАССТОЯНИЕ МЕЖДУ ОБЪЕКТАМИ: ~${dist} КМ</div>`;
+    document.getElementById('cmpBody').innerHTML = html;
+    cmpModal.style.display = 'flex';
+  }
+
+  map.on('popupopen', e => {
+    const body = e.popup.getElement().querySelector('.popup-body');
+    const title = e.popup.getElement().querySelector('.popup-header');
+    if (!body || body.querySelector('.btn-cmp')) return;
+    const name = title ? title.textContent.trim() : '';
+    const d = depositsData.find(x => x.n === name);
+    if (!d) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-cmp';
+    const isSel = cmpList.some(x => x.n === d.n);
+    btn.textContent = isSel ? '✓ Выбрано (выберите 2-е)' : (cmpList.length ? `⚖️ Сравнить с: ${cmpList.at(0).n}` : '⚖️ Выбрать для сравнения');
+    btn.style.cssText = 'display:block;width:100%;margin-top:6px;padding:7px;background:rgba(15,23,42,0.95);color:#38bdf8;border:1px solid #38bdf8;border-radius:6px;font-weight:600;font-size:11px;cursor:pointer;';
+
+    btn.onclick = () => {
+      if (cmpList.some(x => x.n === d.n)) return;
+      cmpList.push(d);
+      if (cmpList.length === 1) {
+        btn.textContent = '✓ Выбрано! Откройте 2-й объект';
+      } else {
+        showCompare(cmpList.at(0), cmpList.at(1));
+        map.closePopup();
+      }
+    };
+    body.appendChild(btn);
+  });
 
 })();
