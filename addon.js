@@ -261,4 +261,51 @@
   document.querySelectorAll('#filtersList input').forEach(cb => { cb.onchange = () => { cb.checked ? activeCategories.add(cb.value) : activeCategories.delete(cb.value); enhancedUpdate(); }; });
   chJs.onload = enhancedUpdate;
   enhancedUpdate();
+  const wiki = 'https://upload.' + 'wikimedia.org/wikipedia/commons/thumb/';
+  const exactPhotos = {
+    'Самотлорское': wiki + 'a/a7/%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg/640px-%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg',
+    'Уренгойское': wiki + '6/6b/%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg/640px-%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg',
+    'Ямбургское': wiki + '4/4c/Jamburg_Ansicht.JPG/640px-Jamburg_Ansicht.JPG'
+  };
+
+  const catPhotos = {
+    'нефть': wiki + 'a/a7/%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg/640px-%D0%A4%D0%BE%D1%82%D0%BE_%D0%A1%D0%B0%D0%BC%D0%BE%D1%82%D0%BB%D0%BE%D1%80%D0%B0_%D1%81_%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0.jpg',
+    'нефть и газ': wiki + '4/4c/Jamburg_Ansicht.JPG/640px-Jamburg_Ansicht.JPG',
+    'газ': wiki + '6/6b/%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg/640px-%D0%A3%D1%80%D0%B5%D0%BD%D0%B3%D0%BE%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%93%D0%A0%D0%AD%D0%A1.jpg',
+    'уголь': wiki + 'c/c5/BelAZ_75600.JPG/640px-BelAZ_75600.JPG',
+    'железная руда': wiki + '8/87/Mining_in_Mezhdurechensk.jpg/640px-Mining_in_Mezhdurechensk.jpg'
+  };
+  const defPhoto = wiki + '8/87/Mining_in_Mezhdurechensk.jpg/640px-Mining_in_Mezhdurechensk.jpg';
+
+  map.on('popupopen', e => {
+    const body = e.popup.getElement().querySelector('.popup-body');
+    const title = e.popup.getElement().querySelector('.popup-header');
+    if (!body || body.querySelector('.popup-img')) return;
+    const name = title ? title.textContent.trim() : '';
+    const d = depositsData.find(x => x.n === name);
+    const imgUrl = (d && d.img) || exactPhotos[name] || (d && catPhotos[d.c]) || defPhoto;
+
+    const img = document.createElement('img');
+    img.className = 'popup-img';
+    img.src = imgUrl;
+    img.alt = name;
+    img.style.cssText = 'width:100%;height:125px;object-fit:cover;border-radius:6px;margin-bottom:9px;border:1px solid rgba(56,189,248,0.35);display:block;';
+    img.onerror = () => img.style.display = 'none';
+    body.insertBefore(img, body.firstChild);
+  });
+  const world = [[90, -180], [90, 180], [-90, 180], [-90, -180]];
+  const westSiberia = [
+    [73.2, 66.5], [73.5, 73.0], [72.5, 82.0], [69.0, 86.5],
+    [64.0, 89.5], [58.0, 90.5], [53.0, 89.8], [50.2, 86.0],
+    [50.8, 79.5], [53.8, 75.5], [54.5, 70.5], [54.2, 63.5],
+    [57.5, 60.5], [62.0, 59.5], [66.5, 61.5], [70.0, 65.0]
+  ];
+
+  L.polygon([world, westSiberia], {
+    color: '#38bdf8',
+    weight: 2,
+    fillColor: '#090e1c',
+    fillOpacity: 0.72,
+    interactive: false
+  }).addTo(map);
 })();
