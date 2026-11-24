@@ -378,6 +378,10 @@
     tBtn.textContent = off ? '☰' : '◀';
   };
   document.body.appendChild(tBtn);
+  cp.classList.add('collapsed');
+  tBtn.classList.add('shifted');
+  document.body.classList.add('panel-hidden');
+  tBtn.textContent = '☰';
 
 
 })();
