@@ -343,6 +343,41 @@
       window.updateMap();
     }, 180);
   };
+  const panelStyle = document.createElement('style');
+  panelStyle.textContent = `
+    .control-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .control-panel.collapsed { transform: translateX(-110%); }
+    .panel-toggle {
+      position: absolute; top: 14px; left: 354px; z-index: 1001;
+      width: 34px; height: 34px; border-radius: 8px;
+      background: rgba(9,14,28,0.92); color: #38bdf8;
+      border: 1px solid rgba(56,189,248,0.4); cursor: pointer;
+      backdrop-filter: blur(10px); font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5); transition: left 0.3s ease;
+    }
+    .panel-toggle.shifted { left: 14px; }
+    .leaflet-top.leaflet-left { left: 396px !important; transition: left 0.3s ease; }
+    body.panel-hidden .leaflet-top.leaflet-left { left: 56px !important; }
+    @media (max-width: 640px) {
+      .control-panel.collapsed { transform: translateY(-110%); }
+      .panel-toggle { left: auto; right: 14px; top: 14px; }
+      .panel-toggle.shifted { left: 14px; right: auto; }
+    }
+  `;
+  document.head.appendChild(panelStyle);
+
+  const cp = document.querySelector('.control-panel');
+  const tBtn = document.createElement('button');
+  tBtn.className = 'panel-toggle';
+  tBtn.textContent = '◀';
+  tBtn.onclick = () => {
+    const off = cp.classList.toggle('collapsed');
+    tBtn.classList.toggle('shifted', off);
+    document.body.classList.toggle('panel-hidden', off);
+    tBtn.textContent = off ? '☰' : '◀';
+  };
+  document.body.appendChild(tBtn);
 
 
 })();
