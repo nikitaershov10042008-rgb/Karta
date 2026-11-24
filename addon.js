@@ -293,11 +293,11 @@
     img.onerror = () => img.style.display = 'none';
     body.insertBefore(img, body.firstChild);
   });
-      const M = Array.of;
-  const world = P(P(90, -180), P(90, 180), P(-90, 180), P(-90, -180));
-  const pts = depositsData.map(d => P(d.lat, d.lng)).sort((a, b) => a.at(1) - b.at(1) || a.at(0) - b.at(0));
+        const M = Array.of;
+  const world = M(M(90, -180), M(90, 180), M(-90, 180), M(-90, -180));
+  const pts = depositsData.map(d => M(d.lat, d.lng)).sort((a, b) => a.at(1) - b.at(1) || a.at(0) - b.at(0));
   const cross = (o, a, b) => (a.at(1) - o.at(1)) * (b.at(0) - o.at(0)) - (a.at(0) - o.at(0)) * (b.at(1) - o.at(1));
-  const low = P(), up = P();
+  const low = M(), up = M();
   pts.forEach(p => { while (low.length >= 2 && cross(low.at(-2), low.at(-1), p) <= 0) low.pop(); low.push(p); });
   for (let i = pts.length - 1; i >= 0; i--) {
     const p = pts.at(i);
@@ -313,16 +313,17 @@
     const a = Math.atan2(dLat, dLng);
     const padLat = Math.sin(a) * 1.8;
     const padLng = (Math.cos(a) * 1.8) / Math.cos(p.at(0) * Math.PI / 180);
-    return P(p.at(0) + padLat, p.at(1) + padLng);
+    return M(p.at(0) + padLat, p.at(1) + padLng);
   });
 
-  L.polygon(P(world, westSiberia), {
+  L.polygon(M(world, westSiberia), {
     color: '#38bdf8',
     weight: 2,
     fillColor: '#090e1c',
     fillOpacity: 0.72,
     interactive: false
   }).addTo(map);
+
 
 
 })();
