@@ -286,5 +286,21 @@
     };
     body.appendChild(btn);
   });
+  const fixUi = document.createElement('style');
+  fixUi.textContent = `
+    .leaflet-top.leaflet-right { top: 58px !important; right: 14px !important; }
+    .leaflet-control-layers {
+      background: rgba(9,14,28,0.92) !important;
+      border: 1px solid rgba(56,189,248,0.35) !important;
+      color: #e2e8f0 !important;
+      border-radius: 8px !important;
+      backdrop-filter: blur(10px);
+    }
+    .status-tabs { display: none !important; }
+    @media (max-width: 640px) {
+      .leaflet-top.leaflet-right { top: 82px !important; }
+    }
+  `;
+  document.head.appendChild(fixUi);
 
 })();
